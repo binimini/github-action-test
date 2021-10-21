@@ -38,20 +38,24 @@ jobs:
          
       - name: Setting .env
         run: |
+         echo $PWD
+         cd client/
          touch .env
          echo REACT_APP_SERVER_URL=${{ secrets.REACT_APP_SERVER_URL }} > .env
          cat .env
        
       - name : Build React
-        run: npm run-script build
+        run: |
+         cd client/
+         npm run-script build
         
       - name: Install Server node_modules
         run: |
-          cd ..
           cd server/
           npm install
       - name : Setting server config
         run: |
+         cd server/
          mkdir config
          cd config/
          touch config.json
