@@ -51,3 +51,4 @@ jobs:
           script: |
            pwd
            ifconfig
+           touch test-ssh
