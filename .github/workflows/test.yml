@@ -64,32 +64,8 @@ jobs:
          touch github.config.json
          echo {\"url\":\"/\"} > client.config.json
          echo {\"secret\": \"${{ secrets.SESSION_SECRET }}\"} > session.config.json 
-         echo {\"clientId\": \"${{ secrets.OAUTH_GITHUB_ID }}\", 
-         \"clienSecret\": \"${{ secrets.OAUTH_GITHUB_SECRET }}\", 
-         \"redirectURL\": \"${{ secrets.OAUTH_GITHUB_REDIRECT }}\"} > github.config.json
-         echo {
-          \"development\": {
-            \"username\": \"bmtown\",
-            \"password\": \"${{ secrets.DB_PASSWORD }}\",
-            \"database\": \"bmtown\",
-            \"host\": \"127.0.0.1\",
-            \"dialect\": \"mysql\"
-          },
-          \"test\": {
-          \"username\": \"bmtown\",
-            \"password\": \"${{ secrets.DB_PASSWORD }}\",
-            \"database\": \"bmtown\",
-            \"host\": \"127.0.0.1\",
-            \"dialect\": \"mysql\"
-          },
-          \"production\": {
-               \"username\": \"bmtown\",
-            \"password\": \"${{ secrets.DB_PASSWORD }}\",
-            \"database\": \"bmtown\",
-            \"host\": \"127.0.0.1\",
-            \"dialect\": \"mysql\"
-          }
-         } > config.json      
+         echo {\"clientId\": \"${{ secrets.OAUTH_GITHUB_ID }}\", \"clienSecret\": \"${{ secrets.OAUTH_GITHUB_SECRET }}\", \"redirectURL\": \"${{ secrets.OAUTH_GITHUB_REDIRECT }}\"} > github.config.json
+         echo {\"development\": {\"username\": \"bmtown\",\"password\": \"${{ secrets.DB_PASSWORD }}\",\"database\": \"bmtown\",\"host\": \"127.0.0.1\",\"dialect\": \"mysql\"},\"test\": {\"username\": \"bmtown\",\"password\": \"${{ secrets.DB_PASSWORD }}\",\"database\": \"bmtown\",\"host\": \"127.0.0.1\",\"dialect\": \"mysql\"},\"production\": {\"username\": \"bmtown\",\"password\": \"${{ secrets.DB_PASSWORD }}\",\"database\": \"bmtown\",\"host\": \"127.0.0.1\",\"dialect\": \"mysql\"}} > config.json      
          cat config.json
          cat client.config.json
          cat session.config.json
