@@ -41,3 +41,11 @@ jobs:
          cat .env
       - name: Build Express
         run: npm run build --if-present
+      - name: SSH connect
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: whoami
