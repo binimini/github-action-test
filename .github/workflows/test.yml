@@ -64,11 +64,10 @@ jobs:
          touch github.config.json
          echo {\"url\":\"/\"} > client.config.json
          echo {\"secret\": \"${{ secrets.SESSION_SECRET }}\"} > session.config.json 
-         echo {\"clientId\": \"${{ secrets.OAUTH_GITHUB_ID }}\", |
-         \"clienSecret\": \"${{ secrets.OAUTH_GITHUB_SECRET }}\", |
+         echo {\"clientId\": \"${{ secrets.OAUTH_GITHUB_ID }}\", 
+         \"clienSecret\": \"${{ secrets.OAUTH_GITHUB_SECRET }}\", 
          \"redirectURL\": \"${{ secrets.OAUTH_GITHUB_REDIRECT }}\"} > github.config.json
-         echo |
-               {
+         echo {
           \"development\": {
             \"username\": \"bmtown\",
             \"password\": \"${{ secrets.DB_PASSWORD }}\",
