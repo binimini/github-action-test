@@ -30,17 +30,78 @@ jobs:
         uses: actions/setup-node@v2.4.1
         with:
           node-version: 14.x
-      - name: Install node_modules
+         
+      - name: Install Client node_modules
         run: |
-         pwd
-         npm install   
+         cd client/
+         npm install
+         
       - name: Setting .env
         run: |
          touch .env
          echo REACT_APP_SERVER_URL=${{ secrets.REACT_APP_SERVER_URL }} > .env
          cat .env
-      - name: Build Express
-        run: npm run build --if-present
+       
+      - name : Build React
+        run: npm run-script build
+        
+      - name: Install Server node_modules
+        run: |
+          cd ..
+          cd server/
+          npm install
+      - name : Setting server config
+        run: |
+         mkdir config
+         cd config/
+         touch config.json
+         touch client.config.json
+         touch session.config.json
+         touch github.config.json
+         echo {\"url\":\"/\"} > client.config.json
+         echo {\"secret\": \"${{ secrets.SESSION_SECRET }}\"} > session.config.json 
+         echo |
+         {\"clientId\": \"${{ secrets.OAUTH_GITHUB_ID }}\", |
+         \"clienSecret\": \"${{ secrets.OAUTH_GITHUB_SECRET }}\", |
+         \"redirectURL\": \"${{ secrets.OAUTH_GITHUB_REDIRECT }}\"} > github.config.json
+         echo |
+               {
+          \"development\": {
+            \"username\": \"bmtown\",
+            \"password\": \"${{ secrets.DB_PASSWORD }}\",
+            \"database\": \"bmtown\",
+            \"host\": \"127.0.0.1\",
+            \"dialect\": \"mysql\"
+          },
+          \"test\": {
+          \"username\": \"bmtown\",
+            \"password\": \"${{ secrets.DB_PASSWORD }}\",
+            \"database\": \"bmtown\",
+            \"host\": \"127.0.0.1\",
+            \"dialect\": \"mysql\"
+          },
+          \"production\": {
+               \"username\": \"bmtown\",
+            \"password\": \"${{ secrets.DB_PASSWORD }}\",
+            \"database\": \"bmtown\",
+            \"host\": \"127.0.0.1\",
+            \"dialect\": \"mysql\"
+          }
+         } > config.json      
+         cat config.json
+         cat client.config.json
+         cat session.config.json
+         cat github.config.json
+         
+      - name: SCP action
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          source: "./"
+          target: "test/"
       - name: SSH connect
         uses: appleboy/ssh-action@master
         with:
@@ -53,12 +114,3 @@ jobs:
            ifconfig
            touch test-ssh
            
-      - name: SCP action
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
-          port: ${{ secrets.PORT }}
-          source: "./"
-          target: "test/"
