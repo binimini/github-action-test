@@ -79,7 +79,7 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
           source: "./"
-          target: "test/"
+          target: "/javascript-p4-bmtown"
       - name: SSH connect
         uses: appleboy/ssh-action@master
         with:
@@ -88,7 +88,6 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
           script: |
-           pwd
-           ifconfig
-           touch test-ssh
-           
+           systemctl restart nginx.service
+           pm2 restart www
+          
