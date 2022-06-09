@@ -19,6 +19,7 @@ jobs:
           DATABASE: ${{ secrets.DB_DATABASE}}
         run: mkdir config
   deploy:
+    runs-on: unbuntu-latest
     name: Deploy Docker container
     needs: build
     steps:
