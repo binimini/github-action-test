@@ -1,93 +1,49 @@
-# This is a basic workflow to help you get started with Actions
+name: Build and Deploy
 
-name: CI
-
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    branches: [dev]
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
+    name: Setting
+    runs-on: unbuntu-latest
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - name: Checkout GitHub repository
+        uses: actions/checkout@v2
 
-      # Runs a single command using the runners shell
-      - name: Setup Node.js
-        uses: actions/setup-node@v2.4.1
-        with:
-          node-version: 14.x
-         
-      - name: Install Client node_modules
-        run: |
-         cd client/
-         npm install
-         
-      - name: Setting .env
-        run: |
-         echo $PWD
-         cd client/
-         touch .env
-         echo REACT_APP_SERVER_URL=${{ secrets.REACT_APP_SERVER_URL }} > .env
-         cat .env
-       
-      - name : Build React
-        run: |
-         cd client/
-         npm run-script build
-        
-      - name: Install Server node_modules
-        run: |
-          cd server/
-          npm install
-      - name : Setting server config
-        run: |
-         cd server/
-         mkdir config
-         cd config/
-         touch config.json
-         touch client.config.json
-         touch session.config.json
-         touch github.config.json
-         echo {\"url\":\"/\"} > client.config.json
-         echo {\"secret\": \"${{ secrets.SESSION_SECRET }}\"} > session.config.json 
-         echo {\"clientId\": \"${{ secrets.OAUTH_GITHUB_ID }}\", \"clienSecret\": \"${{ secrets.OAUTH_GITHUB_SECRET }}\", \"redirectURL\": \"${{ secrets.OAUTH_GITHUB_REDIRECT }}\"} > github.config.json
-         echo {\"development\": {\"username\": \"bmtown\",\"password\": \"${{ secrets.DB_PASSWORD }}\",\"database\": \"bmtown\",\"host\": \"127.0.0.1\",\"dialect\": \"mysql\"},\"test\": {\"username\": \"bmtown\",\"password\": \"${{ secrets.DB_PASSWORD }}\",\"database\": \"bmtown\",\"host\": \"127.0.0.1\",\"dialect\": \"mysql\"},\"production\": {\"username\": \"bmtown\",\"password\": \"${{ secrets.DB_PASSWORD }}\",\"database\": \"bmtown\",\"host\": \"127.0.0.1\",\"dialect\": \"mysql\"}} > config.json      
-         cat config.json
-         cat client.config.json
-         cat session.config.json
-         cat github.config.json
-         
-      - name: SCP action
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
-          port: ${{ secrets.PORT }}
-          source: "./"
-          target: "/javascript-p4-bmtown"
-      - name: SSH connect
+      - name: Make secrets
+        env:
+          USERNAME: ${{ secrets.DB_USERNAME}}
+          PASSWORD: ${{ secrets.DB_PASSWORD}}
+          DATABASE: ${{ secrets.DB_DATABASE}}
+        run: mkdir config
+  deploy:
+    name: Deploy Docker container
+    needs: build
+    steps:
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build image
+        run: docker build dockerfile . -t ${{ secrets.DOCKERHUB_USERNAME }}/growth-be:latest
+
+      - name: Docker login
+        run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+      - name: Push image
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/growth-be:latest
+
+      - name: Run container in server
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
-          port: ${{ secrets.PORT }}
+          host: ${{ secrets.REMOTE_IP }}
+          username: ${{ secrets.REMOTE_USERNAME }}
+          key: ${{ secrets.REMOTE_PASSWORD }}
+          port: ${{ secrets.REMOTE_PORT }}
           script: |
-           systemctl restart nginx.service
-           pm2 restart www
-          
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/growth-be:latest
+            docker rmi $(docker images -f "dangling=true" -q)
+            docker stop growth-be
+            docker rm growth-bea
+            docker run --restart=unless-stopped -d -p 8080:8080 --name growth-be ${{ secrets.DOCKERHUB_USERNAME }}/growth-be:latest
