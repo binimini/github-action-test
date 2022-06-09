@@ -8,14 +8,3 @@ jobs:
   build:
     name: Setting
     runs-on: unbuntu-latest
-    steps:
-    - name: Checkout GitHub repository
-      uses: actions/checkout@v2
-    - name: Make secrets
-      env: 
-        USERNAME: ${{ secrets.DB_USERNAME}}
-        PASSWORD: ${{ secrets.DB_PASSWORD}}
-        DATABASE: ${{ secrets.DB_DATABASE}}
-      run : |
-          mkdir config
-          echo   '{\n"development": {\n"username": "$USERNAME",\n"password": "$PASSWORD",\n"database": "$DATABASE",\n"host": "localhost",\n"dialect": "mysql"\n}\n}' > config/db-config.json
