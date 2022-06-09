@@ -8,3 +8,6 @@ jobs:
   build:
     name: Setting
     runs-on: unbuntu-latest
+    steps:
+      - name: Checkout GitHub repository
+        uses: actions/checkout@v2
