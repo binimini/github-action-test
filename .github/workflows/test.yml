@@ -29,6 +29,7 @@ jobs:
             "dialect": "mysql"
           }
         }" > config/db-config.json
+        cat config/db-config.json
         
     - name: Set up Docker
       uses: docker/setup-buildx-action@v2
